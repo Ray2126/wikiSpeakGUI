@@ -19,7 +19,7 @@ import javafx.scene.control.TextInputDialog;
 
 public class SearchDialog extends TextInputDialog {
 	
-	private ExecutorService _team = Executors.newFixedThreadPool(3); 
+	private ExecutorService _team = Executors.newSingleThreadExecutor(); 
 	private SearchTask _job;
 	private List<String> _rawSentences = new ArrayList<String>();
 	private SentencesDialog _sentencesDialog;
@@ -36,7 +36,6 @@ public class SearchDialog extends TextInputDialog {
 			@Override
 			public void handle(ActionEvent arg0) {
 				String wordToSearch = getEditor().getText();
-				System.out.println("word" + wordToSearch);
 				_job = new SearchTask(wordToSearch);
 				try {
 					_team.submit(_job);
@@ -47,16 +46,8 @@ public class SearchDialog extends TextInputDialog {
 							try {
 								_rawSentences = _job.get();
 								if(_rawSentences != null) {
-									_sentencesDialog = new SentencesDialog(Alert.AlertType.CONFIRMATION, _rawSentences);
+									_sentencesDialog = new SentencesDialog(Alert.AlertType.CONFIRMATION, _rawSentences, wordToSearch);
 									_sentencesDialog.showAndWait();
-									_sentencesDialog.setOnCloseRequest(new EventHandler<DialogEvent>() {
-
-										@Override
-										public void handle(DialogEvent event) {
-											
-										}
-										
-									});
 								}
 
 									

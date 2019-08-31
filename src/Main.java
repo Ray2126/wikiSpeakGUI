@@ -50,6 +50,16 @@ public class Main extends Application{
 		ObservableList<String> creationFileNames = refreshListView();
 		_creationListView = new ListView<String>(creationFileNames);
 		
+		
+		_refreshButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent e) {
+				refreshListView();
+			}
+			
+		});
+		
 		_createButton.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
@@ -93,6 +103,8 @@ public class Main extends Application{
 		for(int i = 0; i < creations.length; i++) {
 			creationFileNames.add(creations[i].getName());
 		}
+		
+		_creationListView = new ListView<String>(creationFileNames);
 		return creationFileNames;
 	}
 	

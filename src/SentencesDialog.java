@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,8 +26,9 @@ public class SentencesDialog extends Alert{
 	private ComboBox<String> _numSelector;
 	private int _selectedNum;
 	private MakeCreationTask _job;
+	private ExecutorService _team = Executors.newSingleThreadExecutor(); 
 	
-	public SentencesDialog(AlertType alertType, List<String> sentences) {
+	public SentencesDialog(AlertType alertType, List<String> sentences, String wordToSearch) {
 		super(alertType);
 		setTitle("Number of sentences");
 		setHeaderText("How many sentences would you like in the final creation?");
@@ -63,7 +66,8 @@ public class SentencesDialog extends Alert{
 				for(int i =0; i<_selectedNum; i++) {
 					newSentences.add(sentences.get(i));
 				}
-				_job = new MakeCreationTask(newSentences);
+				_job = new MakeCreationTask(newSentences, wordToSearch);
+				_team.submit(_job);
 				
 			}
 			
