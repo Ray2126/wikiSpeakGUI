@@ -22,7 +22,7 @@ public class SearchDialog extends TextInputDialog {
 	private ExecutorService _team = Executors.newSingleThreadExecutor(); 
 	private SearchTask _job;
 	private List<String> _rawSentences = new ArrayList<String>();
-	private SentencesDialog _sentencesDialog;
+	private CreationDialog _sentencesDialog;
 	
 	
 	public SearchDialog() {
@@ -30,42 +30,43 @@ public class SearchDialog extends TextInputDialog {
 		setTitle("WikiSearch");
 		setHeaderText("What would you like to search?");
 		setContentText("Enter the word you would like to search:");	
-		Button okButton = (Button) this.getDialogPane().lookupButton(ButtonType.OK);
-		okButton.setOnAction(new EventHandler<ActionEvent>() {
-
-			@Override
-			public void handle(ActionEvent arg0) {
-				String wordToSearch = getEditor().getText();
-				_job = new SearchTask(wordToSearch);
-				try {
-					_team.submit(_job);
-					_job.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-
-						@Override
-						public void handle(WorkerStateEvent event) {
-							try {
-								_rawSentences = _job.get();
-								if(_rawSentences != null) {
-									_sentencesDialog = new SentencesDialog(Alert.AlertType.CONFIRMATION, _rawSentences, wordToSearch);
-									_sentencesDialog.showAndWait();
-								}
-
-									
-
-							} catch (InterruptedException | ExecutionException e) {
-								e.printStackTrace();
-							}
-						}
-					
-					});
-
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			}
-			
-		});
-		
+//		Button okButton = (Button) this.getDialogPane().lookupButton(ButtonType.OK);
+//		okButton.setOnAction(new EventHandler<ActionEvent>() {
+//
+//			@Override
+//			public void handle(ActionEvent arg0) {
+//				String wordToSearch = getEditor().getText();
+//				_job = new SearchTask(wordToSearch);
+//				try {
+//					_team.submit(_job);
+//					_job.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+//
+//						@Override
+//						public void handle(WorkerStateEvent event) {
+//							try {
+//								_rawSentences = _job.get();
+//								if(_rawSentences != null) {
+//									_sentencesDialog = new CreationDialog(Alert.AlertType.CONFIRMATION, _rawSentences, wordToSearch);
+//									_sentencesDialog.showAndWait();
+//									
+//								}
+//
+//									
+//
+//							} catch (InterruptedException | ExecutionException e) {
+//								e.printStackTrace();
+//							}
+//						}
+//					
+//					});
+//
+//				} catch (Exception e1) {
+//					e1.printStackTrace();
+//				}
+//			}
+//			
+//		});
+//		
 	}
 
 
