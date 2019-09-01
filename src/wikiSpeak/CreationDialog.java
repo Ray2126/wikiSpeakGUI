@@ -42,6 +42,10 @@ public class CreationDialog extends Alert{
 			sentenceNumbersObservable.add(i + "");
 		}
 		_numSelector.setItems(sentenceNumbersObservable);	
+		_numSelector.getSelectionModel().selectFirst();
+		
+		_sentenceTextArea.setPrefHeight(300);
+		_sentenceTextArea.setPrefHeight(250);
 		
 		selectPane.getChildren().addAll(_sentencesLabel, _numSelector);
 		creationNamePane.getChildren().addAll(_creationNameLabel, _creationNameTextInput);

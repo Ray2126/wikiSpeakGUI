@@ -3,6 +3,7 @@ package wikiSpeak;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -34,35 +35,50 @@ public class MakeCreationTask extends Task<Void>{
 		Files.write(path, _sentences, StandardCharsets.UTF_8);
 		
 		String cmd = "cat text.txt | text2wave -o speech.wav";
-		ProcessBuilder processTTSBuilder = new ProcessBuilder("bash", "-c", cmd);
-		Process processTTS = processTTSBuilder.start();
-		processTTS.waitFor();
-		System.out.println("Made tts file");
+		Process process = runProcess(cmd);
+		if(process.exitValue() == 0) {
+			String cmd2 = "soxi -D speech.wav";
+			process = runProcess(cmd2);
+			if(process.exitValue() == 0) {
+				InputStream stdout = process.getInputStream();
+				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+				String vidLength = stdoutBuffered.readLine();
+				String cmd3 = "ffmpeg -f lavfi -i color=c=blue:s=320x240 -t " + vidLength + " -vf \"drawtext=fontsize=30:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text="+ _wordToSearch + "\" video.mp4 &> /dev/null";
+				process = runProcess(cmd3);
+				if(process.exitValue() == 0) {
+					String cmd4 = "ffmpeg -i video.mp4 -i speech.wav -strict experimental ./Creations/" + _creationName + ".mp4 &> /dev/null";
+					runProcess(cmd4);
+					if(process.exitValue() == 0) {
+						Runnable createdSuccess = new Runnable() {
 
-		
-		String cmd2 = "soxi -D speech.wav";
-		ProcessBuilder processVidLengthBuilder = new ProcessBuilder("bash", "-c", cmd2);
-		Process processVidLength = processVidLengthBuilder.start();
-		processVidLength.waitFor();
-		InputStream stdout = processVidLength.getInputStream();
-		BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-		String vidLength = stdoutBuffered.readLine();
-		System.out.println("Made vidLength file - " + vidLength);
-		
-		String cmd3 = "ffmpeg -f lavfi -i color=c=blue:s=320x240 -t " + vidLength + " -vf \"drawtext=fontsize=30:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text="+ _wordToSearch + "\" video.mp4 &> /dev/null";
-		System.out.println(cmd3);
-		ProcessBuilder processCreateVideoBuilder = new ProcessBuilder("bash", "-c", cmd3);
-		System.out.println("1");
-		Process processCreateVideo = processCreateVideoBuilder.start();
-		System.out.println("2");
-		processCreateVideo.waitFor();
-		System.out.println("Made video file");
-		
-		String cmd4 = "ffmpeg -i video.mp4 -i speech.wav -strict experimental ./Creations/" + _creationName + ".mp4 &> /dev/null";
-		ProcessBuilder processCreateCreationBuilder = new ProcessBuilder("bash", "-c", cmd4);
-		Process processCreateCreation = processCreateCreationBuilder.start();
-		processCreateCreation.waitFor();
-		
+							@Override
+							public void run() {
+								Alert alert = new Alert(Alert.AlertType.INFORMATION);
+								alert.setTitle("Success!");
+								alert.setHeaderText(null);
+								alert.setContentText(_creationName + " had been made successfully and is ready to play!");
+								alert.showAndWait();
+							}
+							
+						};
+						Platform.runLater(createdSuccess); 
+					}
+					else {
+						processError();
+					}
+				}
+				else {
+					processError();
+				}
+			}
+			else {
+				processError();
+			}
+		}
+		else {
+			processError();
+		}
+
 		//Remove temporary files after creation is done
 		List<File> tempFiles = new ArrayList<File>();
 		tempFiles.add(new File("text.txt"));
@@ -72,22 +88,38 @@ public class MakeCreationTask extends Task<Void>{
 			tempFiles.get(i).delete();
 		}
 		
-		Runnable createdSuccessfully = new Runnable() {
+		return null;
+	}	
+	
+	private void processError() {
+		Runnable createdFailed = new Runnable() {
 
 			@Override
 			public void run() {
-				Alert alert = new Alert(Alert.AlertType.INFORMATION);
-				alert.setTitle("Success!");
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Failure!");
 				alert.setHeaderText(null);
-				alert.setContentText(_creationName + " had been made successfully and is ready to play!");
+				alert.setContentText(_creationName + " could not be created!");
 				alert.showAndWait();
 			}
 			
 		};
-		
-		Platform.runLater(createdSuccessfully); 
-		
-		
+		Platform.runLater(createdFailed); 
+	}
+
+	private Process runProcess(String cmd) {
+		ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+		Process process;
+		try {
+			process = pb.start();
+			process.waitFor();
+			return process;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		return null;
-	}	
+	}
 }
